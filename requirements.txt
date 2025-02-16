@@ -30,3 +30,8 @@ screeninfo
 uiautomation
 dashscope
 groq
+torchaudio
+pillow
+fastapi
+uvicorn
+huggingface_hub
