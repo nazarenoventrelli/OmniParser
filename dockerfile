@@ -1,10 +1,10 @@
 # Usa una imagen base con soporte para GPU si es necesario
 FROM nvidia/cuda:12.1.1-devel-ubuntu22.04
 
-# Instala dependencias esenciales
-    RUN apt-get update && apt-get install -y \
-    python3.10 python3-pip git libgl1-mesa-glx && \
-    apt-get clean
+  # Instala dependencias esenciales para Python y OpenCV
+RUN apt-get update && apt-get install -y \
+python3.10 python3-pip git libgl1-mesa-glx libglib2.0-0 && \
+rm -rf /var/lib/apt/lists/*
 
 # Configura el entorno de trabajo
 WORKDIR /app
