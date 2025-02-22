@@ -1,30 +1,33 @@
-# Usa una imagen base con soporte para GPU si es necesario
+# Usa una imagen base con soporte para GPU
 FROM nvidia/cuda:12.1.1-devel-ubuntu22.04
 
-  # Instala dependencias esenciales para Python y OpenCV
+# Instala dependencias esenciales
 RUN apt-get update && apt-get install -y \
-python3.10 python3-pip git libgl1-mesa-glx libglib2.0-0 && \
-rm -rf /var/lib/apt/lists/*
+    python3.10 python3-pip git libgl1 libglib2.0-0 git-lfs && \
+    rm -rf /var/lib/apt/lists/*
 
 # Configura el entorno de trabajo
 WORKDIR /app
 
-# Clona el repositorio
-RUN git clone https://github.com/nazarenoventrelli/OmniParser.git
+# Clona el repositorio y entra en el directorio
+RUN git clone https://github.com/nazarenoventrelli/OmniParser.git && \
+    cd OmniParser && git lfs install && git lfs pull
 
-# Entra en el repositorio
+# Instala dependencias
 WORKDIR /app/OmniParser
-
-# Instala dependencias del proyecto
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia los pesos del modelo a la carpeta adecuada (esto puede cambiar si los tienes en otro lado)
-RUN mkdir -p weights/icon_detect weights/icon_caption_florence
-RUN huggingface-cli download microsoft/OmniParser-v2.0 --local-dir weights --repo-type model --include "icon_detect/*"
-RUN huggingface-cli download microsoft/OmniParser-v2.0 --local-dir weights --repo-type model --include "icon_caption/*"
-RUN mv weights/icon_caption weights/icon_caption_florence
+# Asegurar que OpenCV usa solo la versión sin GUI
+RUN pip uninstall -y opencv-python && pip install --no-cache-dir opencv-python-headless
 
-# Cambiar el directorio de trabajo a omnitool (donde está omniparserserver.py)
+# Descarga los pesos del modelo correctamente
+RUN mkdir -p weights/icon_detect weights/icon_caption_florence
+RUN git clone https://huggingface.co/microsoft/OmniParser-v2.0 weights/huggingface_models
+RUN mv weights/huggingface_models/icon_detect/* weights/icon_detect/
+RUN mv weights/huggingface_models/icon_caption/* weights/icon_caption_florence/
+RUN rm -rf weights/huggingface_models
+
+# Cambiar el directorio de trabajo a omnitool
 WORKDIR /app/OmniParser/omnitool
 
 # Exponer el puerto
