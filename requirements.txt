@@ -10,7 +10,6 @@ transformers
 ultralytics==8.3.70
 azure-identity
 numpy==1.26.4
-opencv-python
 opencv-python-headless
 dill
 accelerate
