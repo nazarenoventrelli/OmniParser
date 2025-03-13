@@ -1,6 +1,6 @@
 <img src="../imgs/header_bar.png" alt="OmniTool Header" width="100%">
 
-# OmniTool
+# OmniTool 
 
 Control a Windows 11 VM with OmniParser + your vision model of choice.
 
