@@ -18,8 +18,30 @@ RUN git clone https://github.com/nazarenoventrelli/OmniParser.git && \
 WORKDIR /app/OmniParser
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Asegurar que OpenCV usa solo la versión sin GUI
-RUN pip uninstall -y opencv-python && pip install --no-cache-dir opencv-python-headless
+# Instalar OpenCV completo con todas las dependencias necesarias
+RUN apt-get update && apt-get install -y \
+    libopencv-dev \
+    python3-opencv && \
+    rm -rf /var/lib/apt/lists/*
+
+# Asegurar que OpenCV está correctamente instalado con todas las funcionalidades
+RUN pip uninstall -y opencv-python opencv-python-headless && \
+    pip install --no-cache-dir opencv-python==4.8.1.78
+
+# Parchar el archivo utils.py de supervision para manejar el error de FONT_HERSHEY_SIMPLEX
+RUN mkdir -p /tmp/patch && \
+    echo 'import os\n\
+import sys\n\
+import supervision\n\
+utils_path = os.path.join(os.path.dirname(supervision.__file__), "draw/utils.py")\n\
+with open(utils_path, "r") as f:\n\
+    content = f.read()\n\
+content = content.replace("text_font: int = cv2.FONT_HERSHEY_SIMPLEX,", "text_font: int = 0,  # FONT_HERSHEY_SIMPLEX")\n\
+with open(utils_path, "w") as f:\n\
+    f.write(content)\n\
+print("Supervision utils.py patched successfully!")' > /tmp/patch/patch_supervision.py && \
+    python3 /tmp/patch/patch_supervision.py && \
+    rm -rf /tmp/patch
 
 # Configurar PaddlePaddle correctamente para CUDA
 RUN pip uninstall -y paddlepaddle-gpu paddlepaddle && \

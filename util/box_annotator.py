@@ -84,7 +84,12 @@ class BoxAnnotator:
             )
             ```
         """
-        font = cv2.FONT_HERSHEY_SIMPLEX
+        # Add fallback for font if FONT_HERSHEY_SIMPLEX is not available
+        try:
+            font = cv2.FONT_HERSHEY_SIMPLEX
+        except AttributeError:
+            # Define the font constant manually if it's not available
+            font = 0  # 0 is the value for FONT_HERSHEY_SIMPLEX in OpenCV
         for i in range(len(detections)):
             x1, y1, x2, y2 = detections.xyxy[i].astype(int)
             class_id = (
