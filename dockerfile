@@ -2,9 +2,10 @@
 FROM nvidia/cuda:12.1.1-devel-ubuntu22.04
 
 # Instala dependencias esenciales
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     python3.10 python3-pip git libgl1 libglib2.0-0 git-lfs \
-    libgomp1 libgeos-dev && \
+    libgomp1 libgeos-dev tzdata && \
     rm -rf /var/lib/apt/lists/*
 
 # Configura el entorno de trabajo
