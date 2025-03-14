@@ -3,7 +3,8 @@ FROM nvidia/cuda:12.1.1-devel-ubuntu22.04
 
 # Instala dependencias esenciales
 RUN apt-get update && apt-get install -y \
-    python3.10 python3-pip git libgl1 libglib2.0-0 git-lfs && \
+    python3.10 python3-pip git libgl1 libglib2.0-0 git-lfs \
+    libgomp1 libgeos-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Configura el entorno de trabajo
@@ -19,6 +20,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Asegurar que OpenCV usa solo la versión sin GUI
 RUN pip uninstall -y opencv-python && pip install --no-cache-dir opencv-python-headless
+
+# Configurar PaddlePaddle correctamente para CUDA
+RUN pip uninstall -y paddlepaddle-gpu paddlepaddle && \
+    pip install --no-cache-dir paddlepaddle-gpu==2.5.2.post116 -f https://www.paddlepaddle.org.cn/whl/linux/mkl/avx/stable.html
 
 # Descarga los pesos del modelo correctamente
 RUN mkdir -p weights/icon_detect weights/icon_caption_florence

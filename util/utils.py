@@ -18,17 +18,33 @@ import numpy as np
 # %matplotlib inline
 from matplotlib import pyplot as plt
 import easyocr
-from paddleocr import PaddleOCR
+# Initialize easyocr reader
 reader = easyocr.Reader(['en'])
-paddle_ocr = PaddleOCR(
-    lang='en',  # other lang also available
-    use_angle_cls=False,
-    use_gpu=False,  # using cuda will conflict with pytorch in the same process
-    show_log=False,
-    max_batch_size=1024,
-    use_dilation=True,  # improves accuracy
-    det_db_score_mode='slow',  # improves accuracy
-    rec_batch_num=1024)
+
+# Initialize PaddleOCR with try-except to handle potential errors
+try:
+    from paddleocr import PaddleOCR
+    paddle_ocr = PaddleOCR(
+        lang='en',  # other lang also available
+        use_angle_cls=False,
+        use_gpu=False,  # using cuda will conflict with pytorch in the same process
+        show_log=False,
+        max_batch_size=1024,
+        use_dilation=True,  # improves accuracy
+        det_db_score_mode='slow',  # improves accuracy
+        rec_batch_num=1024)
+except Exception as e:
+    print(f"Warning: Failed to initialize PaddleOCR: {e}")
+    # Create a dummy paddle_ocr object that will use easyocr as fallback
+    class DummyPaddleOCR:
+        def ocr(self, img, cls=False):
+            print("Using EasyOCR as fallback for PaddleOCR")
+            result = reader.readtext(img)
+            # Convert easyocr format to paddleocr format
+            return [[[(item[0][0], item[0][1]), (item[0][2], item[0][1]), 
+                     (item[0][2], item[0][3]), (item[0][0], item[0][3])], 
+                    (item[1], 0.9)] for item in result]
+    paddle_ocr = DummyPaddleOCR()
 import time
 import base64
 
